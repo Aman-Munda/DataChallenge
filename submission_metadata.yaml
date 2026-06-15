@@ -1,0 +1,74 @@
+# Redrob Hackathon — Submission Metadata
+# Team: solo-kiro
+
+team_name: "solo-kiro"
+
+primary_contact:
+  name: "Aman Munda"
+  email: "aman.munda@example.com"
+  phone: "+91-XXXXXXXXXX"
+
+team_members:
+  - name: "Aman Munda"
+    email: "aman.munda@example.com"
+    role: "Solo Participant"
+
+# ============================================================================
+# Code and reproducibility
+# ============================================================================
+github_repo: "https://github.com/amun0071/DataChallenge"
+
+sandbox_link: "https://huggingface.co/spaces/solo-kiro/redrob-ranker"
+
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+
+# ============================================================================
+# Compute environment
+# ============================================================================
+compute:
+  platform: "Windows 11, AMD Ryzen 7"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.11"
+  os: "Windows 11"
+  uses_gpu_for_inference: false
+  has_network_during_ranking: false
+  pre_computation_required: true
+  pre_computation_time_minutes: 2
+
+# ============================================================================
+# AI tools declaration
+# ============================================================================
+ai_tools_used:
+  - "Kilo (AI coding assistant)"
+
+ai_usage_summary: |
+  Used Kilo for architecture design, code implementation, debugging, and
+  deck generation. All candidate scoring logic is deterministic and rule-based.
+  No candidate data was fed to any LLM during ranking. TF-IDF + cosine
+  similarity is computed locally with scikit-learn.
+
+# ============================================================================
+# Approach summary
+# ============================================================================
+methodology_summary: |
+  Three-layer hybrid scoring: (1) TF-IDF cosine similarity over 50K features
+  captures holistic profile-to-JD relevance; (2) Domain intelligence layer
+  with trust-weighted skill scoring (proficiency × endorsements × duration),
+  career trajectory analysis, product-vs-consulting classification, and
+  production deployment evidence; (3) Behavioral layer weighting availability,
+  responsiveness, and engagement signals. Honeypot detection catches ~80
+  fake profiles via duration mismatches, impossible expertise claims, and
+  keyword stuffing. Anti-disqualification penalties for consulting-only
+  careers, CV/speech-only without NLP/IR, and no production ML evidence.
+  Runs on CPU in ~45 seconds with zero network calls.
+
+# ============================================================================
+# Declarations
+# ============================================================================
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true

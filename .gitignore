@@ -1,0 +1,45 @@
+# Provided data (not our code)
+\[PUB\] India_runs_data_and_ai_challenge/
+candidates.jsonl
+
+# Pre-computed artifacts (reproducible via --precompute)
+artifacts/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Generated output (reproducible via rank.py)
+submission.csv
+
+# Deck generation scripts (utility, not part of ranking)
+create_deck.py
+create_deck_pdf.py
+
+# Generated deck files
+Idea_Submission_Redrob.pptx
+Idea_Submission_Redrob.pdf
+
+# Provided template
+Idea Submission Template _ Redrob.pdf
