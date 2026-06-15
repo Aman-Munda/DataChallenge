@@ -3,6 +3,7 @@ import math
 from typing import Dict, List, Any, Optional, Tuple
 
 
+# Job description parameters used for scoring alignment
 JD_ROLE = {
     "title": "Senior AI Engineer",
     "company": "Redrob AI",
@@ -13,6 +14,7 @@ JD_ROLE = {
     "work_mode": "hybrid",
 }
 
+# Skill taxonomy: core AI skills relevant to the Senior AI Engineer role
 CORE_AI_SKILLS = {
     "embeddings", "sentence-transformers", "bert", "transformers", "hugging face transformers",
     "faiss", "pinecone", "weaviate", "qdrant", "milvus", "opensearch", "elasticsearch",
@@ -30,11 +32,13 @@ CORE_AI_SKILLS = {
     "python",
 }
 
+# Vector database technologies (JD: "vector databases or hybrid search infrastructure")
 VECTOR_DB_SKILLS = {
     "faiss", "pinecone", "weaviate", "qdrant", "milvus",
     "opensearch", "elasticsearch", "chromadb", "chroma", "annoy",
 }
 
+# Retrieval and search skills (JD: "embeddings-based retrieval systems")
 RETRIEVAL_SKILLS = {
     "rag", "retrieval augmented generation", "vector search", "vector databases",
     "embeddings", "sentence-transformers", "bert", "hugging face transformers",
@@ -42,6 +46,7 @@ RETRIEVAL_SKILLS = {
     "recommendation systems", "ranking", "search", "information retrieval",
 }
 
+# LLM and fine-tuning skills (JD: "LLM fine-tuning experience (LoRA, QLoRA, PEFT)")
 LLM_SKILLS = {
     "llm", "large language models", "fine-tuning llms", "lora", "qlora", "peft",
     "prompt engineering", "langchain", "openai", "gpt", "claude",
@@ -61,12 +66,14 @@ PYTHON_ECOSYSTEM = {
     "mlflow", "wandb", "weights & biases", "kubeflow",
 }
 
+# Consulting firms that the JD explicitly flags as disqualifying if it's the only experience
 CONSULTING_COMPANIES = {
     "tcs", "infosys", "wipro", "accenture", "cognizant", "capgemini",
     "hcl", "tech mahindra", "mindtree", "lti", "mphasis",
     "deloitte", "pwc", "ey", "kpmg", "mckinsey", "bcg", "bain",
 }
 
+# Industry keywords indicating product-company experience (preferred over consulting)
 PRODUCT_INDICATORS = {
     "software", "fintech", "saas", "ai", "ml", "data", "cloud",
     "platform", "product", "startup", "e-commerce", "marketplace",
@@ -92,6 +99,9 @@ def compute_skill_overlap(candidate_skills: List[Dict], target_set: set) -> Tupl
 
 
 def compute_weighted_skill_score(candidate_skills: List[Dict], target_set: set) -> float:
+    """Score skills against a target set using a trust model:
+    trust = 0.4 * proficiency + 0.3 * endorsements + 0.3 * duration.
+    Catches keyword stuffers who list 'expert' with 0 endorsements or 0 months usage."""
     if not candidate_skills:
         return 0.0
 
@@ -185,6 +195,9 @@ def compute_work_mode_score(signals: Dict) -> float:
 
 
 def compute_behavioral_score(signals: Dict) -> float:
+    """Score candidate availability and responsiveness from platform signals.
+    Components: open-to-work (20%), response rate (15%), recency (15%),
+    notice period (15%), engagement (10%), interview/offer rates (20%)."""
     score = 0.0
 
     open_to_work = signals.get("open_to_work_flag", False)
@@ -234,6 +247,11 @@ def compute_behavioral_score(signals: Dict) -> float:
 
 
 def detect_honeypot(candidate: Dict) -> Tuple[bool, float, List[str]]:
+    """Detect fake/impossible profiles via 6 consistency checks.
+    Returns (is_honeypot, penalty_score, reasons). Penalty >= 0.3 triggers flag.
+    Catches: duration mismatches, career-total contradictions, expert skills with
+    0 months usage, keyword stuffing by non-AI titles, education date anomalies,
+    salary range contradictions."""
     reasons = []
     penalty = 0.0
 
@@ -313,6 +331,9 @@ def detect_honeypot(candidate: Dict) -> Tuple[bool, float, List[str]]:
 
 
 def compute_title_alignment(profile: Dict, career: List[Dict]) -> float:
+    """Evaluate AI/ML career trajectory via three signals:
+    35% current title/headline match, 40% career history AI-months ratio,
+    25% summary AI keyword density."""
     current_title = (profile.get("current_title", "") or "").lower()
     headline = (profile.get("headline", "") or "").lower()
     summary = (profile.get("summary", "") or "").lower()
@@ -370,6 +391,8 @@ def compute_title_alignment(profile: Dict, career: List[Dict]) -> float:
 
 
 def compute_product_company_score(career: List[Dict]) -> float:
+    """Fraction of career spent at product companies (not consulting).
+    JD explicitly prefers product-company backgrounds over services firms."""
     product_months = 0
     total_months = 0
 

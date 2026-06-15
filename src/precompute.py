@@ -10,6 +10,9 @@ import pickle
 
 
 def build_candidate_text(candidate: dict) -> str:
+    """Flatten a candidate profile into a single text string for TF-IDF.
+    Includes: headline, current title+company, summary, top 4 career roles
+    (title + company + description), all skill names, and education."""
     profile = candidate.get("profile", {})
     career = candidate.get("career_history", [])
     skills = candidate.get("skills", [])
@@ -80,6 +83,10 @@ JD_TEXT = (
 
 
 def precompute_tfidf(candidates_path: str, output_dir: str):
+    """Pre-compute TF-IDF matrix and JD cosine similarities for all candidates.
+    Outputs: tfidf_candidates.npz, tfidf_jd.npz, tfidf_ids.json,
+    tfidf_vectorizer.pkl, jd_similarities.npy.
+    Takes ~2 minutes for 100K candidates."""
     print("Loading candidates...")
     candidates = []
     if candidates_path.endswith(".gz"):
@@ -105,6 +112,8 @@ def precompute_tfidf(candidates_path: str, output_dir: str):
         if (i + 1) % 20000 == 0:
             print(f"  Processed {i + 1}/{len(candidates)}")
 
+    # TF-IDF config: 50K features, unigrams+bigrams, sublinear TF scaling.
+    # min_df=2 / max_df=0.95 filters noise and ubiquitous terms.
     print("Building TF-IDF matrix...")
     vectorizer = TfidfVectorizer(
         max_features=50000,

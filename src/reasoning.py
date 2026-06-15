@@ -6,6 +6,8 @@ VECTOR_DB_NAMES = {
     "opensearch", "elasticsearch", "chromadb", "chroma",
 }
 
+# Skill verification: only skills with advanced/expert proficiency AND 12+ months
+# usage, OR 15+ endorsements, are mentioned in reasoning (prevents hallucination).
 AI_SKILL_KEYWORDS = [
     "embeddings", "faiss", "qdrant", "milvus", "pinecone", "weaviate",
     "rag", "llm", "nlp", "pytorch", "tensorflow", "transformers",
@@ -162,6 +164,12 @@ def generate_reasoning(
     honeypot_info: tuple,
     rank: int = 50,
 ) -> str:
+    """Generate rank-aware reasoning that varies tone by position.
+    Top 10: highlight strengths + JD connection, note minor gaps.
+    11-30: balanced, acknowledge concerns.
+    31-60: cautious, highlight gaps.
+    61-100: honestly note limitations.
+    All skill mentions verified against actual profile data (no hallucination)."""
     profile = candidate.get("profile", {})
     career = candidate.get("career_history", [])
     skills = candidate.get("skills", [])

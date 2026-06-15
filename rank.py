@@ -25,6 +25,8 @@ from datetime import datetime
 import numpy as np
 
 
+# Curated JD requirements as a single text block for TF-IDF similarity.
+# Distilled from the full JD to emphasize technical requirements and filter keywords.
 JD_TEXT = (
     "Senior AI Engineer Redrob AI Series AI native talent intelligence platform "
     "Own intelligence layer ranking retrieval matching systems "
@@ -171,6 +173,9 @@ def rank_candidates(candidates: list, jd_sim: np.ndarray, sim_ids: list) -> list
                 education_score += 0.1
         education_score = min(education_score, 1.0)
 
+        # Composite score: weighted sum of 16 components + 2 additive bonuses.
+        # Base weights sum to 0.99; python_bonus and prod_desc_bonus are additive
+        # (theoretical max ~1.14, clamped to [0,1] at the end).
         raw_score = (
             0.22 * sem_score +
             0.20 * title_score +
@@ -192,9 +197,11 @@ def rank_candidates(candidates: list, jd_sim: np.ndarray, sim_ids: list) -> list
             prod_desc_bonus
         )
 
+        # Honeypot penalty: reduce score by up to 80% of the detected penalty
         if is_honeypot:
             raw_score *= (1.0 - honeypot_penalty * 0.8)
 
+        # Consulting-only penalty: entire career at IT services firms with weak AI alignment
         consulting_only = True
         for role in career:
             company = (role.get("company", "") or "").lower()
@@ -206,6 +213,7 @@ def rank_candidates(candidates: list, jd_sim: np.ndarray, sim_ids: list) -> list
         if consulting_only and title_score < 0.3:
             raw_score *= 0.6
 
+        # CV/Speech-only penalty: computer vision/speech expertise without NLP/IR exposure
         career_text = " ".join((r.get("description", "") + " " + r.get("title", "")).lower() for r in career)
         skill_text = " ".join(s.get("name", "").lower() for s in skills)
         all_text = career_text + " " + skill_text
@@ -216,6 +224,7 @@ def rank_candidates(candidates: list, jd_sim: np.ndarray, sim_ids: list) -> list
         if has_cv_speech and not has_ir_nlp and ai_career_ratio < 0.3:
             raw_score *= 0.7
 
+        # No production ML evidence: low AI career ratio + no production keywords + weak title
         no_prod_ml = ai_career_ratio <= 0.2 and career_desc_ai <= 0.2 and not has_prod_desc
         if no_prod_ml and title_score < 0.3:
             raw_score *= 0.7
